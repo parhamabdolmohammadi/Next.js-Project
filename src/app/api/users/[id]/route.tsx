@@ -1,27 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import schema from "../schema";
+import prisma from "@/prisma/client";
 
-interface Props {
-  params: {
-    id: number;
-  };
-}
-
-export function GET(
+export async function GET(
   request: NextRequest,
   {
     params,
   }: {
     params: {
-      id: number;
+      id: string;
     };
   }
 ) {
-  if (params.id > 10) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: parseInt(params.id),
+    },
+  });
+
+  if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ id: params.id, name: `User ${params.id}` });
+  return NextResponse.json(user);
 }
 
 export async function PUT(
@@ -30,7 +31,7 @@ export async function PUT(
     params,
   }: {
     params: {
-      id: number;
+      id: string;
     };
   }
 ) {
@@ -42,15 +43,31 @@ export async function PUT(
     return NextResponse.json(validation.error.issues, { status: 400 });
   }
 
+  const user = await prisma.user.findUnique({
+    where: {
+      id: parseInt(params.id),
+    },
+  });
+
   if (!body.name) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
 
-  if (params.id > 10) {
+  if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  return NextResponse.json({ id: 1, name: body.name });
+  const updatedUser = prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: {
+      name: body.name,
+      email: body.email,
+    },
+  });
+
+  return NextResponse.json(updatedUser);
 }
 
 export async function DELETE(
@@ -59,13 +76,25 @@ export async function DELETE(
     params,
   }: {
     params: {
-      id: number;
+      id: string;
     };
   }
 ) {
-  if (params.id > 10) {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: parseInt(params.id),
+    },
+  });
+
+  if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
+
+  await prisma.user.delete({
+    where: {
+      id: parseInt(params.id),
+    },
+  });
 
   // Simulate deletion logic here
   return NextResponse.json({ message: "User deleted successfully" });
