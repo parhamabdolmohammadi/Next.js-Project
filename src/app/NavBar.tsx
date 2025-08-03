@@ -19,7 +19,13 @@ const NavBar = () => {
       </Link>
       {status === "loading" && <div className="mr-5">Loading...</div>}
       {status === "authenticated" && (
-        <div className="mr-5">{session.user?.name}</div>
+        <div className="mr-5">
+          {session.user?.name}
+          <Link href="/api/auth/signout" className="ml-3">
+            {" "}
+            Sign Out
+          </Link>
+        </div>
       )}
       {status === "unauthenticated" && (
         <Link href="/api/auth/signin" className="mr-5">
