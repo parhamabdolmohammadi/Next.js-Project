@@ -1,8 +1,10 @@
-// src/app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import prisma  from "@/src/lib/prisma";
 
 const handler = NextAuth({
+  adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     GoogleProvider({
@@ -13,5 +15,3 @@ const handler = NextAuth({
 });
 
 export { handler as GET, handler as POST };
-
-
